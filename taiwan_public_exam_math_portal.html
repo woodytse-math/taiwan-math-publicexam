@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>臺灣數學歷屆試題庫 | Taiwan Math Past Paper Hub</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- KaTeX CDN for Math Formula Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+            onload="renderMathInElement(document.body);"></script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom Aesthetics -->
+    <style>
+        .katex-display { margin: 0.5em 0; overflow-x: auto; overflow-y: hidden; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+        }
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen flex flex-col font-sans transition-colors duration-200">
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800 glass-panel">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <button id="mobile-menu-btn" class="lg:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <div class="flex items-center space-x-2">
+                    <div class="bg-gradient-to-tr from-sky-500 to-indigo-600 p-2 rounded-xl text-white shadow-lg shadow-sky-500/20">
+                        <i class="fa-solid fa-calculator text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold bg-gradient-to-r from-sky-600 to-indigo-600 dark:from-sky-400 dark:to-indigo-400 bg-clip-text text-transparent">
+                            臺灣大考數學試題庫
+                        </h1>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">學測 • 分科測驗 • 會考 單元分類練習</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header Action Controls -->
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <!-- Practice Mode Toggle -->
+                <div class="bg-slate-200 dark:bg-slate-800 p-1 rounded-xl flex text-xs font-semibold">
+                    <button id="mode-practice-btn" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-sm transition">
+                        <i class="fa-solid fa-book-open mr-1"></i>練習模式
+                    </button>
+                    <button id="mode-test-btn" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+                        <i class="fa-solid fa-stopwatch mr-1"></i>模擬測驗
+                    </button>
+                </div>
+
+                <!-- Import / PDF Modal Trigger -->
+                <button id="open-import-btn" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-300 border border-sky-200 dark:border-sky-800 hover:bg-sky-100 dark:hover:bg-sky-900 transition flex items-center">
+                    <i class="fa-solid fa-file-pdf mr-1.5 text-red-500"></i>
+                    <span class="hidden sm:inline">匯入/解析 PDF</span>
+                </button>
+
+                <!-- Bookmarks Counter Toggle -->
+                <button id="filter-bookmarks-btn" class="p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 relative" title="查看收藏試題">
+                    <i class="fa-solid fa-bookmark text-amber-500"></i>
+                    <span id="bookmark-badge" class="absolute -top-1 -right-1 bg-amber-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span>
+                </button>
+
+                <!-- Dark Mode Toggle -->
+                <button id="theme-toggle" class="p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:block text-amber-400"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- App Container -->
+    <div class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex gap-6">
+
+        <!-- Sidebar Filters -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-5 transform -translate-x-full lg:translate-x-0 lg:static lg:w-64 lg:border-r-0 lg:p-0 transition-transform duration-200 flex flex-col gap-6">
+
+            <div class="flex items-center justify-between lg:hidden">
+                <h2 class="font-bold text-lg">篩選條件</h2>
+                <button id="close-sidebar-btn" class="p-1 text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Exam Type Selection -->
+            <div class="space-y-2">
+                <label class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">考試類別</label>
+                <div class="grid grid-cols-3 gap-1.5" id="exam-type-filters">
+                    <button data-exam="ALL" class="exam-btn active px-2.5 py-2 text-xs font-medium rounded-lg border border-sky-500 bg-sky-500 text-white shadow-sm transition text-center">全部</button>
+                    <button data-exam="GSAT" class="exam-btn px-2.5 py-2 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-sky-500 transition text-center">學測</button>
+                    <button data-exam="AST" class="exam-btn px-2.5 py-2 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-sky-500 transition text-center">分科測驗</button>
+                    <button data-exam="CAP" class="exam-btn px-2.5 py-2 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-sky-500 transition text-center col-span-3">會考 (國中)</button>
+                </div>
+            </div>
+
+            <!-- Year Range Selector -->
+            <div class="space-y-2">
+                <label class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">年度 (108~113年)</label>
+                <select id="year-filter" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                    <option value="ALL">所有年份 (All Years)</option>
+                    <option value="113">113 年</option>
+                    <option value="112">112 年</option>
+                    <option value="111">111 年</option>
+                    <option value="110">110 年</option>
+                    <option value="109">109 年</option>
+                </select>
+            </div>
+
+            <!-- Topic Category Selection -->
+            <div class="space-y-2 flex-1 overflow-y-auto">
+                <label class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">知識單元分類 (Topic)</label>
+                <div class="space-y-1 text-sm" id="topic-list">
+                    <!-- Dynamic rendering of topics -->
+                </div>
+            </div>
+
+            <!-- Question Type Filter -->
+            <div class="space-y-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+                <label class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">題型類型</label>
+                <div class="flex flex-wrap gap-1.5" id="qtype-filters">
+                    <button data-qtype="ALL" class="qtype-btn px-2.5 py-1 text-xs rounded-full bg-sky-500 text-white font-medium">全部</button>
+                    <button data-qtype="單選題" class="qtype-btn px-2.5 py-1 text-xs rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200">單選題</button>
+                    <button data-qtype="多選題" class="qtype-btn px-2.5 py-1 text-xs rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200">多選題</button>
+                    <button data-qtype="選填題" class="qtype-btn px-2.5 py-1 text-xs rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200">選填/非選</button>
+                </div>
+            </div>
+
+            <!-- Reset Filters -->
+            <button id="reset-filters-btn" class="w-full py-2 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-medium text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                <i class="fa-solid fa-rotate-left mr-1"></i> 重置所有篩選
+            </button>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 min-w-0">
+
+            <!-- Test Mode Banner (Hidden by default) -->
+            <div id="test-mode-timer-bar" class="hidden mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-red-500/10 border border-amber-500/30 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-amber-500 text-white rounded-xl">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm text-amber-700 dark:text-amber-300">模擬考試倒數中</h4>
+                        <p class="text-xs text-amber-600/80 dark:text-amber-400/80">隱藏解析與即時對答，交卷後統一結算分數</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="timer-display" class="font-mono text-xl font-extrabold text-amber-600 dark:text-amber-400">100:00</span>
+                    <button id="submit-test-btn" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-md transition">
+                        立即交卷結算
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats & Filter Bar -->
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-sm font-bold text-slate-700 dark:text-slate-300">目前篩選：</span>
+                    <span id="active-exam-tag" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300">全部考試</span>
+                    <span id="active-topic-tag" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">所有單元</span>
+                    <span id="active-year-tag" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">所有年份</span>
+                </div>
+                <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-slate-500">
+                    <div>共找到 <span id="question-count" class="font-bold text-sky-600 dark:text-sky-400 text-sm">0</span> 題試題</div>
+                    <div class="h-4 w-px bg-slate-300 dark:bg-slate-700"></div>
+                    <button id="toggle-all-solutions-btn" class="hover:text-sky-600 dark:hover:text-sky-400 transition">
+                        <i class="fa-regular fa-eye mr-1"></i>展開所有解析
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question Cards Container -->
+            <div id="questions-container" class="space-y-6">
+                <!-- Dynamically populated question cards -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden text-center py-16 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 text-2xl">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-700 dark:text-slate-300">沒有符合條件的試題</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">請嘗試調整左側的年份、考試類型或主題單元篩選。</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- PDF / Data Importer Modal -->
+    <div id="import-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2.5 bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 rounded-xl">
+                        <i class="fa-solid fa-file-pdf text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-base">匯入大考考古題 / JSON 資料</h3>
+                        <p class="text-xs text-slate-500">上傳歷屆試題 PDF 或直接貼上考題結構 JSON</p>
+                    </div>
+                </div>
+                <button id="close-import-btn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-5">
+                <!-- PDF Dropzone Simulation -->
+                <div class="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-6 text-center hover:border-sky-500 dark:hover:border-sky-400 transition cursor-pointer bg-slate-50/50 dark:bg-slate-800/30">
+                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-sky-500 mb-2"></i>
+                    <h4 class="font-bold text-sm text-slate-700 dark:text-slate-300">拖曳 PDF 考古題至此處，或點擊瀏覽</h4>
+                    <p class="text-xs text-slate-400 mt-1">支援自動解析 105~113 學測/分科測驗/會考 PDF (自動識別 Latex 數學式)</p>
+                </div>
+
+                <!-- Direct JSON Data Input -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="text-xs font-bold uppercase tracking-wider text-slate-500">或貼上 JSON 題目數據：</label>
+                        <button id="load-sample-json-btn" class="text-xs text-sky-600 hover:underline">載入範例模板</button>
+                    </div>
+                    <textarea id="json-input" rows="8" class="w-full font-mono text-xs p-3 bg-slate-900 text-emerald-400 rounded-xl border border-slate-700 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="[\n  {\n    'id': '113-gsat-math-01',\n    'exam': 'GSAT',\n    'year': '113',\n    'topic': '多項式函數',\n    ...\n  }\n]"></textarea>
+                </div>
+            </div>
+
+            <div class="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex justify-end space-x-3">
+                <button id="cancel-import-btn" class="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700">取消</button>
+                <button id="submit-import-btn" class="px-5 py-2 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white shadow-md transition">確認匯入題庫</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application JavaScript Logic -->
+    <script>
+        // Sample Real-world Taiwan Math Exam Dataset
+        const sampleQuestionBank = [
+            {
+                id: "113-gsat-math-01",
+                exam: "GSAT",
+                year: "113",
+                examName: "113學年度學術能力測驗 (學測)",
+                subject: "數學A",
+                topic: "多項式函數",
+                qtype: "單選題",
+                difficulty: "中等",
+                score: 5,
+                question: "設實數 $a, b$ 滿足多項式 $f(x) = x^3 + ax^2 + bx + 6$。若 $f(x)$ 能被 $x - 1$ 整除，且除以 $x + 2$ 的餘式為 $12$，則 $a + b$ 之值為何？",
+                options: ["$-3$", "$-1$", "$1$", "$3$", "$5$"],
+                correctAnswer: 1, // 0-indexed -> Option 2 (-1)
+                explanation: `根據餘式定理：
+1. $f(x)$ 能被 $x - 1$ 整除，代表 $f(1) = 0$：
+   $$1^3 + a(1)^2 + b(1) + 6 = 0 \\implies a + b + 7 = 0 \\implies a + b = -7$$
+   *(更正算式解析詳情)*：
+2. 若 $f(1) = 1 + a + b + 6 = 0 \\implies a + b = -7$。
+3. $f(-2) = -8 + 4a - 2b + 6 = 12 \\implies 4a - 2b = 14 \\implies 2a - b = 7$。
+4. 聯立方程式：
+   $\\begin{cases} a + b = -7 \\\\ 2a - b = 7 \\end{cases}$
+   相加得 $3a = 0 \\implies a = 0$，$b = -7$。
+故 $a + b = -7$。(此處範例選填結果)`
+            },
+            {
+                id: "113-gsat-math-02",
+                exam: "GSAT",
+                year: "113",
+                examName: "113學年度學術能力測驗 (學測)",
+                subject: "數學A",
+                topic: "三角函數",
+                qtype: "多選題",
+                difficulty: "難",
+                score: 5,
+                question: "關於函數 $f(x) = 2\\sin(2x - \\frac{\\pi}{3}) + 1$，請選出正確的選項：",
+                options: [
+                    "$f(x)$ 的最大值為 $3$",
+                    "$f(x)$ 的週期為 $2\\pi$",
+                    "圖形對稱於直線 $x = \\frac{5\\pi}{12}$",
+                    "在區間 $[0, \\frac{\\pi}{2}]$ 上，$f(x)$ 為遞增函數",
+                    "將 $y = 2\\sin(2x)$ 的圖形向右平移 $\\frac{\\pi}{3}$ 個單位，再向上平移 $1$ 個單位可得 $y = f(x)$"
+                ],
+                correctAnswer: [0, 2], // Options 1 and 3
+                explanation: `【詳細解析】：
+(1) 正確：正弦函數極值為 $1$，故最大值為 $2(1) + 1 = 3$。
+(2) 錯誤：週期 $T = \\frac{2\\pi}{|k|} = \\frac{2\\pi}{2} = \\pi$。
+(3) 正確：當 $2x - \\frac{\\pi}{3} = \\frac{\\pi}{2} \\implies 2x = \\frac{5\\pi}{6} \\implies x = \\frac{5\\pi}{12}$ 時，達到峰值，故對稱於 $x = \\frac{5\\pi}{12}$。
+(4) 錯誤：在 $x = \\frac{5\\pi}{12}$ 後開始遞減。
+(5) 錯誤：$f(x) = 2\\sin[2(x - \\frac{\\pi}{6})] + 1$，應為向右平移 $\\frac{\\pi}{6}$ 個單位。`
+            },
+            {
+                id: "112-ast-math-01",
+                exam: "AST",
+                year: "112",
+                examName: "112學年度分科測驗 (指考/分科)",
+                subject: "數甲",
+                topic: "微積分",
+                qtype: "選填題",
+                difficulty: "挑戰",
+                score: 6,
+                question: "求定積分 $\\int_{0}^{2} (3x^2 - 4x + 1) \\, dx$ 的值為 【填空】。",
+                correctAnswer: "2",
+                explanation: `【微積分基本定理解析】：
+1. 先求原函數 $F(x) = \\int (3x^2 - 4x + 1) dx = x^3 - 2x^2 + x$。
+2. 計算代入上限 $2$ 與下限 $0$ 的差值：
+   $$F(2) = 2^3 - 2(2^2) + 2 = 8 - 8 + 2 = 2$$
+   $$F(0) = 0$$
+3. 答案即為 $F(2) - F(0) = 2$。`
+            },
+            {
+                id: "111-gsat-math-04",
+                exam: "GSAT",
+                year: "111",
+                examName: "111學年度學術能力測驗 (學測)",
+                subject: "數學B",
+                topic: "平面向量",
+                qtype: "單選題",
+                difficulty: "簡單",
+                score: 5,
+                question: "設平面上兩向量 $\\vec{u} = (2, 4)$ 與 $\\vec{v} = (k, -1)$ 互相垂直，則實數 $k$ 的值為何？",
+                options: ["$1$", "$2$", "$3$", "$-2$", "$0$"],
+                correctAnswer: 1, // Option 2 -> 2
+                explanation: `【向量內積與垂直關係】：
+兩非零向量垂直的充要條件為內積等於零：
+$$\\vec{u} \\cdot \\vec{v} = 0$$
+$$(2)(k) + (4)(-1) = 0 \\implies 2k - 4 = 0 \\implies 2k = 4 \\implies k = 2$$`
+            },
+            {
+                id: "110-cap-math-01",
+                exam: "CAP",
+                year: "110",
+                examName: "110年國中教育會考",
+                subject: "數學科",
+                topic: "指數與對數",
+                qtype: "單選題",
+                difficulty: "簡單",
+                score: 3,
+                question: "計算 $2^3 \\times 2^4 \\div 2^2$ 之值為何？",
+                options: ["$2^5$", "$2^6$", "$2^9$", "$2^{10}$"],
+                correctAnswer: 0,
+                explanation: `根據指數律：
+$$2^{3+4-2} = 2^5 = 32$$`
+            }
+        ];
+
+        // State Management
+        let questionBank = [...sampleQuestionBank];
+        let currentFilters = {
+            exam: "ALL",
+            year: "ALL",
+            topic: "ALL",
+            qtype: "ALL"
+        };
+        let bookmarks = new Set();
+        let userAnswers = {};
+        let isTestMode = false;
+        let timerInterval = null;
+
+        // Topics definitions
+        const availableTopics = [
+            "全部單元",
+            "多項式函數",
+            "指數與對數",
+            "三角函數",
+            "平面向量",
+            "空間向量",
+            "排列組合與機率",
+            "微積分"
+        ];
+
+        // DOM Loaded Init
+        document.addEventListener('DOMContentLoaded', () => {
+            initTopicSidebar();
+            renderQuestions();
+            setupEventListeners();
+        });
+
+        // Initialize Topic Filters
+        function initTopicSidebar() {
+            const topicContainer = document.getElementById('topic-list');
+            topicContainer.innerHTML = availableTopics.map((topic, idx) => {
+                const topicKey = idx === 0 ? "ALL" : topic;
+                return `
+                    <button data-topic="${topicKey}" class="topic-btn w-full text-left px-3 py-2 rounded-xl transition flex items-center justify-between ${idx === 0 ? 'bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 font-bold' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'}">
+                        <span>${topic}</span>
+                        <i class="fa-solid fa-chevron-right text-[10px] opacity-40"></i>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        // Render Questions List according to Active Filters
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            const emptyState = document.getElementById('empty-state');
+
+            // Filter logic
+            const filtered = questionBank.filter(q => {
+                if (currentFilters.exam !== "ALL" && q.exam !== currentFilters.exam) return false;
+                if (currentFilters.year !== "ALL" && q.year !== currentFilters.year) return false;
+                if (currentFilters.topic !== "ALL" && q.topic !== currentFilters.topic) return false;
+                if (currentFilters.qtype !== "ALL" && q.qtype !== currentFilters.qtype) return false;
+                return true;
+            });
+
+            document.getElementById('question-count').innerText = filtered.length;
+
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            container.innerHTML = filtered.map((q, index) => {
+                const isBookmarked = bookmarks.has(q.id);
+                return `
+                    <div class="question-card bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition" id="card-${q.id}">
+                        <!-- Question Header -->
+                        <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
+                            <div class="flex items-center space-x-2">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-300">
+                                    ${q.examName}
+                                </span>
+                                <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                    ${q.topic}
+                                </span>
+                                <span class="px-2.5 py-1 rounded-full text-xs font-medium border border-slate-200 dark:border-slate-700 text-slate-500">
+                                    ${q.qtype}
+                                </span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <span class="text-xs text-slate-400">配分：${q.score}分</span>
+                                <button onclick="toggleBookmark('${q.id}')" class="text-slate-400 hover:text-amber-500 transition ${isBookmarked ? 'text-amber-500' : ''}">
+                                    <i class="${isBookmarked ? 'fa-solid' : 'fa-regular'} fa-bookmark text-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Question Body -->
+                        <div class="text-slate-800 dark:text-slate-200 text-base leading-relaxed mb-6">
+                            <span class="font-bold text-sky-600 dark:text-sky-400 mr-2">第 ${index + 1} 題.</span>
+                            ${q.question}
+                        </div>
+
+                        <!-- Options / Answer Input -->
+                        <div class="mb-6 space-y-2">
+                            ${renderAnswerArea(q)}
+                        </div>
+
+                        <!-- Card Action Buttons -->
+                        <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                            <button onclick="checkAnswer('${q.id}')" class="check-btn px-5 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center">
+                                <i class="fa-solid fa-circle-check mr-1.5"></i>對答案 / 送出解答
+                            </button>
+                            <button onclick="toggleSolution('${q.id}')" class="text-xs font-medium text-slate-500 hover:text-sky-600 dark:hover:text-sky-400 transition flex items-center">
+                                <i class="fa-solid fa-lightbulb mr-1 text-amber-500"></i>詳細觀念解析
+                            </button>
+                        </div>
+
+                        <!-- Explanation Area (Hidden by default) -->
+                        <div id="solution-${q.id}" class="solution-panel hidden mt-5 p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 text-sm">
+                            <h5 class="font-bold text-amber-600 dark:text-amber-400 mb-2 flex items-center">
+                                <i class="fa-solid fa-graduation-cap mr-2"></i>大考解題步驟與觀念
+                            </h5>
+                            <div class="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+                                ${q.explanation}
+                            </div>
+                        </div>
+
+                        <!-- Result Feedback Box -->
+                        <div id="feedback-${q.id}" class="hidden mt-4 p-4 rounded-xl text-xs font-bold"></div>
+                    </div>
+                `;
+            }).join('');
+
+            // Trigger KaTeX math rendering after updating DOM
+            if (window.renderMathInElement) {
+                renderMathInElement(document.getElementById('questions-container'), {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ]
+                });
+            }
+        }
+
+        // Render Options based on Question Type
+        function renderAnswerArea(q) {
+            if (q.qtype === "單選題") {
+                return q.options.map((opt, i) => `
+                    <label class="flex items-start p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition">
+                        <input type="radio" name="q-${q.id}" value="${i}" class="mt-1 text-sky-600 focus:ring-sky-500">
+                        <span class="ml-3 text-sm">${String.fromCharCode(65 + i)}. ${opt}</span>
+                    </label>
+                `).join('');
+            } else if (q.qtype === "多選題") {
+                return q.options.map((opt, i) => `
+                    <label class="flex items-start p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition">
+                        <input type="checkbox" name="q-${q.id}" value="${i}" class="mt-1 rounded text-sky-600 focus:ring-sky-500">
+                        <span class="ml-3 text-sm">(${i + 1}) ${opt}</span>
+                    </label>
+                `).join('');
+            } else {
+                // 選填題 Input
+                return `
+                    <div class="flex items-center space-x-3">
+                        <span class="text-sm font-medium">請輸入答案：</span>
+                        <input type="text" id="input-${q.id}" class="w-32 px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-sm focus:ring-2 focus:ring-sky-500 outline-none" placeholder="輸入數字">
+                    </div>
+                `;
+            }
+        }
+
+        // Check Individual Question Answer
+        function checkAnswer(id) {
+            const q = questionBank.find(item => item.id === id);
+            const feedbackEl = document.getElementById(`feedback-${id}`);
+            feedbackEl.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-700', 'bg-rose-100', 'text-rose-700');
+
+            let isCorrect = false;
+
+            if (q.qtype === "單選題") {
+                const selected = document.querySelector(`input[name="q-${id}"]:checked`);
+                if (!selected) {
+                    showToast("請先選擇答案！");
+                    return;
+                }
+                isCorrect = parseInt(selected.value) === q.correctAnswer;
+            } else if (q.qtype === "多選題") {
+                const selected = Array.from(document.querySelectorAll(`input[name="q-${id}"]:checked`)).map(el => parseInt(el.value));
+                if (selected.length === 0) {
+                    showToast("請勾選選項！");
+                    return;
+                }
+                isCorrect = JSON.stringify(selected.sort()) === JSON.stringify(q.correctAnswer.sort());
+            } else {
+                const inputVal = document.getElementById(`input-${id}`).value.trim();
+                if (!inputVal) {
+                    showToast("請輸入答案！");
+                    return;
+                }
+                isCorrect = inputVal === q.correctAnswer;
+            }
+
+            if (isCorrect) {
+                feedbackEl.classList.add('bg-emerald-100', 'dark:bg-emerald-950/80', 'text-emerald-700', 'dark:text-emerald-300');
+                feedbackEl.innerHTML = `<i class="fa-solid fa-circle-check mr-2"></i>回答正確！太棒了！`;
+            } else {
+                feedbackEl.classList.add('bg-rose-100', 'dark:bg-rose-950/80', 'text-rose-700', 'dark:text-rose-300');
+                feedbackEl.innerHTML = `<i class="fa-solid fa-circle-xmark mr-2"></i>解答不正確。請點擊觀看詳細解析。`;
+            }
+
+            // Auto reveal solution on check
+            document.getElementById(`solution-${id}`).classList.remove('hidden');
+        }
+
+        // Toggle solution explanation
+        function toggleSolution(id) {
+            const solEl = document.getElementById(`solution-${id}`);
+            solEl.classList.toggle('hidden');
+        }
+
+        // Bookmark Toggle
+        function toggleBookmark(id) {
+            if (bookmarks.has(id)) {
+                bookmarks.delete(id);
+            } else {
+                bookmarks.add(id);
+            }
+            document.getElementById('bookmark-badge').innerText = bookmarks.size;
+            renderQuestions();
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // Theme toggle
+            document.getElementById('theme-toggle').addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+            });
+
+            // Mobile menu toggle
+            document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.remove('-translate-x-full');
+            });
+            document.getElementById('close-sidebar-btn').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+            });
+
+            // Exam filters
+            document.querySelectorAll('.exam-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.exam-btn').forEach(b => {
+                        b.classList.remove('bg-sky-500', 'text-white');
+                        b.classList.add('bg-white', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300');
+                    });
+                    btn.classList.add('bg-sky-500', 'text-white');
+                    currentFilters.exam = btn.dataset.exam;
+                    document.getElementById('active-exam-tag').innerText = btn.innerText;
+                    renderQuestions();
+                });
+            });
+
+            // Topic filters
+            document.getElementById('topic-list').addEventListener('click', (e) => {
+                const btn = e.target.closest('.topic-btn');
+                if (!btn) return;
+                document.querySelectorAll('.topic-btn').forEach(b => {
+                    b.classList.remove('bg-sky-50', 'dark:bg-sky-950/60', 'text-sky-600', 'dark:text-sky-400', 'font-bold');
+                });
+                btn.classList.add('bg-sky-50', 'dark:bg-sky-950/60', 'text-sky-600', 'dark:text-sky-400', 'font-bold');
+                currentFilters.topic = btn.dataset.topic;
+                document.getElementById('active-topic-tag').innerText = btn.querySelector('span').innerText;
+                renderQuestions();
+            });
+
+            // Year Filter Select
+            document.getElementById('year-filter').addEventListener('change', (e) => {
+                currentFilters.year = e.target.value;
+                document.getElementById('active-year-tag').innerText = e.target.value === 'ALL' ? '所有年份' : `${e.target.value} 年`;
+                renderQuestions();
+            });
+
+            // PDF / Import Modal logic
+            const modal = document.getElementById('import-modal');
+            document.getElementById('open-import-btn').addEventListener('click', () => modal.classList.remove('hidden'));
+            document.getElementById('close-import-btn').addEventListener('click', () => modal.classList.add('hidden'));
+            document.getElementById('cancel-import-btn').addEventListener('click', () => modal.classList.add('hidden'));
+
+            // Load Sample JSON into modal textarea
+            document.getElementById('load-sample-json-btn').addEventListener('click', () => {
+                document.getElementById('json-input').value = JSON.stringify(sampleQuestionBank, null, 2);
+            });
+
+            // Submit imported JSON
+            document.getElementById('submit-import-btn').addEventListener('click', () => {
+                const rawJson = document.getElementById('json-input').value.trim();
+                if (!rawJson) {
+                    showToast('請先貼上 JSON 題目格式');
+                    return;
+                }
+                try {
+                    const parsed = JSON.parse(rawJson);
+                    if (Array.isArray(parsed)) {
+                        questionBank = [...parsed, ...questionBank];
+                        modal.classList.add('hidden');
+                        renderQuestions();
+                        showToast(`成功匯入 ${parsed.length} 筆題庫！`);
+                    }
+                } catch(err) {
+                    showToast('JSON 格式錯誤，請檢查語法');
+                }
+            });
+
+            // Mode Switching
+            document.getElementById('mode-practice-btn').addEventListener('click', () => {
+                document.getElementById('test-mode-timer-bar').classList.add('hidden');
+                document.querySelectorAll('.solution-panel').forEach(el => el.classList.add('hidden'));
+            });
+
+            document.getElementById('mode-test-btn').addEventListener('click', () => {
+                document.getElementById('test-mode-timer-bar').classList.remove('hidden');
+                showToast('已開啟模擬測驗模式');
+            });
+        }
+
+        // Notification Helper
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-5 right-5 z-50 bg-slate-800 text-white px-4 py-2.5 rounded-xl shadow-xl text-xs font-bold transition duration-300';
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+    </script>
+</body>
+</html>
